@@ -11,6 +11,14 @@ export const metadata: Metadata = {
   title: "Autoscore.ch — Les meilleures occasions auto en Suisse",
   description:
     "Autoscore identifie et classe les meilleures opportunités du marché automobile suisse pour vous faire gagner du temps et prendre les bonnes décisions.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: "Autoscore.ch — Les meilleures occasions auto en Suisse",
     description:
