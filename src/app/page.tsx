@@ -48,9 +48,9 @@ export default function Home() {
       <section
         className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative"
         style={{
-          backgroundImage: "url('/autoscore-landing.png')",
+          backgroundImage: "url('/hero-bg.jpg')",
           backgroundSize: "cover",
-          backgroundPosition: "center top",
+          backgroundPosition: "center",
           minHeight: "100vh",
         }}
       >
