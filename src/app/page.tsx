@@ -13,18 +13,15 @@ export default function Home() {
         priority
         unoptimized
       />
-      {/* Bouton transparent sur "Bientôt disponible" carte Vendre */}
+      {/* Bouton vert actif sur la carte Vendre */}
       <Link
         href="/vendre"
-        className="absolute rounded-xl transition-all hover:bg-green-500/20"
-        style={{
-          left: "14.5%",
-          top: "71%",
-          width: "28%",
-          height: "7%",
-        }}
+        className="vendre-btn"
+        style={{ left: "14.5%", top: "71%", width: "28%", height: "7%" }}
         aria-label="Déposer une annonce vendeur"
-      />
+      >
+        Déposer une annonce
+      </Link>
     </main>
   );
 }
