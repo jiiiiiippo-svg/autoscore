@@ -1,21 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
-    <main
-      className="relative w-full min-h-screen"
-      style={{
-        backgroundImage: "url('/autoscore-landing.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center top",
-        backgroundRepeat: "no-repeat",
-      }}
-      aria-label="Autoscore — Coming soon"
-    >
-      {/* Bouton transparent positionné sur "Bientôt disponible" de la carte Vendre */}
+    <main className="relative w-full" aria-label="Autoscore — Coming soon">
+      <Image
+        src="/autoscore-landing.png"
+        alt="Autoscore — Les meilleures occasions auto en Suisse"
+        width={1920}
+        height={1080}
+        className="w-full h-auto block"
+        priority
+      />
+      {/* Bouton cliquable transparent sur "Bientôt disponible" carte Vendre */}
       <Link
         href="/vendre"
-        className="absolute cursor-pointer rounded-xl transition-all hover:bg-green-500/20 hover:scale-105"
+        className="absolute cursor-pointer rounded-xl transition-all hover:bg-green-500/20"
         style={{
           left: "14.5%",
           top: "71%",
