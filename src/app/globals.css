@@ -1,14 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-green-brand: #2e8b57;
-  --color-green-light: #3da06a;
-  --color-green-dark: #1e6b3f;
-}
-
+html,
 body {
-  background: #ffffff;
-  color: #1a1a1a;
-  font-family: var(--font-sans), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  background: #f8fafc;
 }
