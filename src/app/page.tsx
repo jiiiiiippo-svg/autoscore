@@ -17,7 +17,7 @@ export default function Home() {
       <Link
         href="/vendre"
         className="vendre-btn"
-        style={{ left: "14.5%", top: "71%", width: "28%", height: "7%" }}
+        style={{ left: "17%", top: "69%", width: "29%", height: "5.5%" }}
         aria-label="Déposer une annonce vendeur"
       >
         Déposer une annonce
