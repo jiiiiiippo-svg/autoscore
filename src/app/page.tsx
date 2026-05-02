@@ -11,7 +11,7 @@ export default function Home() {
         height={1024}
         className="w-full h-auto block"
         priority
-        quality={100}
+        unoptimized
       />
       {/* Bouton transparent sur "Bientôt disponible" carte Vendre */}
       <Link
