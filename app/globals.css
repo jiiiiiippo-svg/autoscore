@@ -7,4 +7,10 @@ body {
   margin: 0;
   padding: 0;
   background: #f8fafc;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+* {
+  box-sizing: border-box;
 }
