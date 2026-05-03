@@ -57,6 +57,33 @@ export function estimateMarketPrice(car: CarInput): number {
 }
 
 function priceScore(discountPercent: number) {
+  // discountPercent positif = prix sous le marché
+  // discountPercent négatif = prix au-dessus du marché
+
+  if (discountPercent <= -80) {
+    return {
+      points: -2,
+      reason: "Prix extrêmement au-dessus du marché",
+      warning: "Le prix demandé est très éloigné du marché. Le score est fortement pénalisé.",
+    };
+  }
+
+  if (discountPercent <= -50) {
+    return {
+      points: -1.2,
+      reason: "Prix très fortement au-dessus du marché",
+      warning: "Le prix demandé risque de bloquer presque toutes les demandes.",
+    };
+  }
+
+  if (discountPercent <= -30) {
+    return {
+      points: -0.5,
+      reason: "Prix fortement au-dessus du marché",
+      warning: "Un ajustement important du prix est recommandé.",
+    };
+  }
+
   if (discountPercent <= -15) {
     return {
       points: 0,
@@ -73,9 +100,17 @@ function priceScore(discountPercent: number) {
     };
   }
 
-  if (discountPercent < 5) return { points: 2, reason: "Prix aligné avec le marché" };
-  if (discountPercent < 15) return { points: 3.3, reason: "Prix attractif par rapport au marché" };
-  if (discountPercent < 25) return { points: 4, reason: "Très bon prix par rapport au marché" };
+  if (discountPercent < 5) {
+    return { points: 2, reason: "Prix aligné avec le marché" };
+  }
+
+  if (discountPercent < 15) {
+    return { points: 3.3, reason: "Prix attractif par rapport au marché" };
+  }
+
+  if (discountPercent < 25) {
+    return { points: 4, reason: "Très bon prix par rapport au marché" };
+  }
 
   return {
     points: 3.5,
