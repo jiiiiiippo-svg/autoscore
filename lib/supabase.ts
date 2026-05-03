@@ -18,15 +18,32 @@ export type ComparableFromDb = {
   mileage?: number | null;
 };
 
-export async function fetchComparables(input: {
-  brand: string;
-  model: string;
-  year: number;
-  mileage: number;
-}): Promise<ComparableFromDb[]> {
+export async function fetchComparables(
+  brandOrInput:
+    | string
+    | {
+        brand: string;
+        model: string;
+        year: number;
+        mileage: number;
+      },
+  modelArg?: string,
+  yearArg?: number,
+  mileageArg?: number
+): Promise<ComparableFromDb[]> {
   if (!supabase) {
     return [];
   }
+
+  const input =
+    typeof brandOrInput === "string"
+      ? {
+          brand: brandOrInput,
+          model: String(modelArg || ""),
+          year: Number(yearArg),
+          mileage: Number(mileageArg),
+        }
+      : brandOrInput;
 
   const yearMin = input.year - 3;
   const yearMax = input.year + 3;
