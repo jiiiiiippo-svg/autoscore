@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       mileage,
       askingPrice,
       saleTiming: String(body.saleTiming || ""),
-      description: String(body.description || ""),
+      description: "",
       comparablePrices,
     });
 

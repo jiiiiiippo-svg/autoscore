@@ -11,7 +11,6 @@ type FormState = {
   mileage: string;
   askingPrice: string;
   saleTiming: string;
-  description: string;
 };
 
 type ScoreResult = {
@@ -326,7 +325,6 @@ export default function ScorePage() {
     mileage: "",
     askingPrice: "",
     saleTiming: "",
-    description: "",
   });
 
   const [result, setResult] = useState<ScoreResult | null>(null);
@@ -488,16 +486,6 @@ export default function ScorePage() {
                   <option value="1-3">1 à 3 mois</option>
                   <option value="3-6">3 à 6 mois</option>
                 </select>
-              </label>
-
-              <label style={{ ...labelStyle, gridColumn: "1 / -1" }}>
-                Description
-                <textarea
-                  style={{ ...inputStyle, minHeight: 130, resize: "vertical" }}
-                  value={form.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  placeholder="État général, options, historique d’entretien, prix négociable..."
-                />
               </label>
             </div>
 
