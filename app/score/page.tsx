@@ -91,6 +91,137 @@ function formatCHF(value: number) {
   return new Intl.NumberFormat("fr-CH").format(value) + " CHF";
 }
 
+const CAR_YEARS = Array.from(
+  { length: new Date().getFullYear() - 1980 + 2 },
+  (_, index) => String(new Date().getFullYear() + 1 - index)
+);
+
+const CAR_MODELS_BY_BRAND: Record<string, string[]> = {
+  "Abarth": ["500", "595", "695", "124 Spider"],
+  "Alfa Romeo": ["Giulia", "Giulietta", "MiTo", "Stelvio", "Tonale"],
+  "Alpina": ["B3", "B4", "B5", "D3", "XB7"],
+  "Alpine": ["A110"],
+  "Aston Martin": ["DB9", "DB11", "DB12", "DBS", "Vantage", "Vanquish"],
+  "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q4 e-tron", "Q5", "Q7", "Q8", "TT", "R8", "RS3", "RS4", "RS5", "RS6", "RS7", "e-tron", "e-tron GT"],
+  "Bentley": ["Bentayga", "Continental GT", "Flying Spur", "Mulsanne"],
+  "BMW": ["Serie 1", "Serie 2", "Serie 3", "Serie 4", "Serie 5", "Serie 6", "Serie 7", "Serie 8", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "Z4", "i3", "i4", "i5", "i7", "i8", "iX", "M2", "M3", "M4", "M5", "M8"],
+  "BYD": ["Atto 3", "Dolphin", "Han", "Seal", "Tang"],
+  "Cadillac": ["ATS", "CTS", "Escalade", "SRX", "XT4", "XT5", "XT6"],
+  "Chevrolet": ["Aveo", "Camaro", "Captiva", "Corvette", "Cruze", "Spark", "Tahoe", "Trax"],
+  "Chrysler": ["300C", "Grand Voyager", "Pacifica", "PT Cruiser", "Voyager"],
+  "Citroën": ["C1", "C2", "C3", "C3 Aircross", "C4", "C4 Cactus", "C4 Picasso", "C5", "C5 Aircross", "Berlingo", "Jumpy", "SpaceTourer"],
+  "Cupra": ["Ateca", "Born", "Formentor", "Leon", "Tavascan"],
+  "Dacia": ["Duster", "Jogger", "Lodgy", "Logan", "Sandero", "Spring"],
+  "Daewoo": ["Kalos", "Lacetti", "Matiz", "Nubira"],
+  "Daihatsu": ["Cuore", "Materia", "Sirion", "Terios"],
+  "Dodge": ["Caliber", "Challenger", "Charger", "Durango", "Journey", "Ram"],
+  "DS Automobiles": ["DS 3", "DS 4", "DS 5", "DS 7", "DS 9"],
+  "Ferrari": ["458", "488", "812", "California", "F8", "F12", "FF", "Portofino", "Roma", "SF90"],
+  "Fiat": ["500", "500C", "500L", "500X", "Bravo", "Doblo", "Ducato", "Grande Punto", "Panda", "Punto", "Tipo"],
+  "Ford": ["B-Max", "C-Max", "Edge", "Explorer", "Fiesta", "Focus", "Galaxy", "Kuga", "Mondeo", "Mustang", "Puma", "Ranger", "S-Max", "Transit"],
+  "Genesis": ["G70", "G80", "G90", "GV60", "GV70", "GV80"],
+  "Honda": ["Accord", "Civic", "CR-V", "CR-Z", "e", "HR-V", "Jazz", "NSX"],
+  "Hyundai": ["i10", "i20", "i30", "i40", "Ioniq", "Ioniq 5", "Ioniq 6", "Kona", "Santa Fe", "Tucson", "Veloster"],
+  "Infiniti": ["EX", "FX", "Q30", "Q50", "Q60", "Q70", "QX30", "QX50", "QX70"],
+  "Isuzu": ["D-Max", "Trooper"],
+  "Jaguar": ["E-Pace", "F-Pace", "F-Type", "I-Pace", "XE", "XF", "XJ", "XK"],
+  "Jeep": ["Cherokee", "Compass", "Grand Cherokee", "Renegade", "Wrangler"],
+  "Kia": ["Carens", "Ceed", "EV6", "EV9", "Niro", "Optima", "Picanto", "ProCeed", "Rio", "Sorento", "Soul", "Sportage", "Stinger", "XCeed"],
+  "Lamborghini": ["Aventador", "Gallardo", "Huracan", "Urus"],
+  "Lancia": ["Delta", "Musa", "Thema", "Ypsilon"],
+  "Land Rover": ["Defender", "Discovery", "Discovery Sport", "Freelander", "Range Rover", "Range Rover Evoque", "Range Rover Sport", "Range Rover Velar"],
+  "Lexus": ["CT", "ES", "GS", "IS", "LC", "LS", "NX", "RC", "RX", "UX"],
+  "Lotus": ["Elise", "Emira", "Evora", "Exige"],
+  "Maserati": ["Ghibli", "GranCabrio", "GranTurismo", "Grecale", "Levante", "Quattroporte"],
+  "Mazda": ["2", "3", "5", "6", "CX-3", "CX-30", "CX-5", "CX-60", "MX-5", "MX-30", "RX-8"],
+  "McLaren": ["570S", "600LT", "650S", "720S", "Artura", "GT", "MP4-12C"],
+  "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "GLA", "GLB", "GLC", "GLE", "GLS", "G-Class", "SL", "SLC", "AMG GT", "EQA", "EQB", "EQC", "EQE", "EQS", "V-Class", "Vito"],
+  "MG": ["EHS", "HS", "Marvel R", "MG3", "MG4", "MG5", "ZS"],
+  "MINI": ["Cabrio", "Clubman", "Cooper", "Countryman", "Paceman"],
+  "Mitsubishi": ["ASX", "Colt", "Eclipse Cross", "L200", "Lancer", "Outlander", "Pajero", "Space Star"],
+  "Nissan": ["350Z", "370Z", "Ariya", "Juke", "Leaf", "Micra", "Murano", "Navara", "Note", "Primastar", "Pulsar", "Qashqai", "X-Trail"],
+  "Opel": ["Adam", "Antara", "Astra", "Corsa", "Crossland", "Grandland", "Insignia", "Karl", "Meriva", "Mokka", "Vivaro", "Zafira"],
+  "Peugeot": ["107", "108", "206", "207", "208", "2008", "307", "308", "3008", "407", "508", "5008", "Partner", "Rifter", "Traveller"],
+  "Polestar": ["1", "2", "3", "4"],
+  "Porsche": ["718 Boxster", "718 Cayman", "911", "Cayenne", "Macan", "Panamera", "Taycan"],
+  "Renault": ["Captur", "Clio", "Espace", "Kadjar", "Kangoo", "Koleos", "Laguna", "Megane", "Scenic", "Talisman", "Trafic", "Twingo", "Zoe"],
+  "Rolls-Royce": ["Cullinan", "Dawn", "Ghost", "Phantom", "Wraith"],
+  "Saab": ["9-3", "9-5"],
+  "Seat": ["Alhambra", "Arona", "Ateca", "Ibiza", "Leon", "Mii", "Tarraco", "Toledo"],
+  "Škoda": ["Citigo", "Enyaq", "Fabia", "Kamiq", "Karoq", "Kodiaq", "Octavia", "Rapid", "Scala", "Superb", "Yeti"],
+  "Smart": ["Forfour", "Fortwo", "Roadster"],
+  "SsangYong": ["Korando", "Musso", "Rexton", "Tivoli"],
+  "Subaru": ["BRZ", "Forester", "Impreza", "Justy", "Legacy", "Levorg", "Outback", "XV"],
+  "Suzuki": ["Across", "Alto", "Baleno", "Ignis", "Jimny", "S-Cross", "Swift", "SX4", "Vitara"],
+  "Tesla": ["Model 3", "Model S", "Model X", "Model Y", "Roadster"],
+  "Toyota": ["Auris", "Avensis", "Aygo", "C-HR", "Camry", "Corolla", "GT86", "Highlander", "Hilux", "Land Cruiser", "Prius", "Proace", "RAV4", "Supra", "Yaris"],
+  "Volkswagen": ["Amarok", "Arteon", "Beetle", "Caddy", "California", "Golf", "Golf GTI", "Golf R", "ID.3", "ID.4", "ID.5", "Passat", "Polo", "Scirocco", "Sharan", "T-Cross", "T-Roc", "Tiguan", "Touareg", "Touran", "Transporter", "Up"],
+  "Volvo": ["C30", "C40", "S40", "S60", "S80", "S90", "V40", "V50", "V60", "V70", "V90", "XC40", "XC60", "XC70", "XC90"],
+};
+
+const CAR_BRANDS = [
+  "Abarth",
+  "Alfa Romeo",
+  "Alpina",
+  "Alpine",
+  "Aston Martin",
+  "Audi",
+  "Bentley",
+  "BMW",
+  "BYD",
+  "Cadillac",
+  "Chevrolet",
+  "Chrysler",
+  "Citroën",
+  "Cupra",
+  "Dacia",
+  "Daewoo",
+  "Daihatsu",
+  "Dodge",
+  "DS Automobiles",
+  "Ferrari",
+  "Fiat",
+  "Ford",
+  "Genesis",
+  "Honda",
+  "Hyundai",
+  "Infiniti",
+  "Isuzu",
+  "Jaguar",
+  "Jeep",
+  "Kia",
+  "Lamborghini",
+  "Lancia",
+  "Land Rover",
+  "Lexus",
+  "Lotus",
+  "Maserati",
+  "Mazda",
+  "McLaren",
+  "Mercedes-Benz",
+  "MG",
+  "MINI",
+  "Mitsubishi",
+  "Nissan",
+  "Opel",
+  "Peugeot",
+  "Polestar",
+  "Porsche",
+  "Renault",
+  "Rolls-Royce",
+  "Saab",
+  "Seat",
+  "Škoda",
+  "Smart",
+  "SsangYong",
+  "Subaru",
+  "Suzuki",
+  "Tesla",
+  "Toyota",
+  "Volkswagen",
+  "Volvo",
+];
+
 function formatPricePosition(value: number) {
   const abs = Math.abs(value).toFixed(1);
 
@@ -271,33 +402,56 @@ export default function ScorePage() {
             <div style={formGridStyle}>
               <label style={labelStyle}>
                 Marque *
-                <input
+                <select
                   style={inputStyle}
                   value={form.brand}
-                  onChange={(e) => updateField("brand", e.target.value)}
-                  placeholder="ex: BMW"
-                />
+                  onChange={(e) => {
+                    updateField("brand", e.target.value);
+                    updateField("model", "");
+                  }}
+                >
+                  <option value="">Sélectionner une marque</option>
+                  {CAR_BRANDS.map((brand) => (
+                    <option key={brand} value={brand}>
+                      {brand}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label style={labelStyle}>
                 Modèle *
-                <input
+                <select
                   style={inputStyle}
                   value={form.model}
                   onChange={(e) => updateField("model", e.target.value)}
-                  placeholder="ex: M4"
-                />
+                  disabled={!form.brand}
+                >
+                  <option value="">
+                    {form.brand ? "Sélectionner un modèle" : "Sélectionnez d’abord une marque"}
+                  </option>
+                  {(CAR_MODELS_BY_BRAND[form.brand] || []).map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label style={labelStyle}>
                 Année *
-                <input
+                <select
                   style={inputStyle}
-                  type="number"
                   value={form.year}
                   onChange={(e) => updateField("year", e.target.value)}
-                  placeholder="ex: 2022"
-                />
+                >
+                  <option value="">Sélectionner une année</option>
+                  {CAR_YEARS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label style={labelStyle}>
