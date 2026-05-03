@@ -11,3 +11,63 @@ export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseServiceRoleKey);
 export const supabase = hasSupabaseConfig
   ? createClient(supabaseUrl as string, supabaseServiceRoleKey as string)
   : null;
+
+export type ComparableFromDb = {
+  price: number;
+  year?: number | null;
+  mileage?: number | null;
+};
+
+export async function fetchComparables(input: {
+  brand: string;
+  model: string;
+  year: number;
+  mileage: number;
+}): Promise<ComparableFromDb[]> {
+  if (!supabase) {
+    return [];
+  }
+
+  const yearMin = input.year - 3;
+  const yearMax = input.year + 3;
+  const mileageMin = Math.max(0, input.mileage - 60000);
+  const mileageMax = input.mileage + 60000;
+
+  const { data, error } = await supabase
+    .from("market_listings")
+    .select("price, year, mileage")
+    .ilike("brand", input.brand)
+    .ilike("model", input.model)
+    .gte("year", yearMin)
+    .lte("year", yearMax)
+    .gte("mileage", mileageMin)
+    .lte("mileage", mileageMax)
+    .not("price", "is", null)
+    .limit(20);
+
+  if (error) {
+    console.error("Supabase fetchComparables error:", error.message);
+    return [];
+  }
+
+  return (data || []).filter((item) => Number.isFinite(Number(item.price)));
+}
+
+export function medianPrice(values: number[]) {
+  const clean = values
+    .map(Number)
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
+
+  if (clean.length === 0) {
+    return null;
+  }
+
+  const middle = Math.floor(clean.length / 2);
+
+  if (clean.length % 2 === 0) {
+    return Math.round((clean[middle - 1] + clean[middle]) / 2);
+  }
+
+  return Math.round(clean[middle]);
+}
