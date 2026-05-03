@@ -12,6 +12,8 @@ export type CarInput = {
 export type ScoreResult = {
   score: number;
   marketPrice: number;
+  marketPriceSource: string;
+  priceSamplesUsed: number;
   discountPercent: number;
   recommendedPriceMin: number;
   recommendedPriceMax: number;
@@ -243,6 +245,8 @@ export function calculateAutoscore(car: CarInput, realMarketPrice?: number): Sco
   return {
     score,
     marketPrice,
+    marketPriceSource: "Prix estimé à partir du modèle Autoscore",
+    priceSamplesUsed: 0,
     discountPercent: Math.round(discountPercent * 10) / 10,
     recommendedPriceMin,
     recommendedPriceMax,
