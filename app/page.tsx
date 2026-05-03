@@ -1,46 +1,51 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
-    <main
-      aria-label="Autoscore — Les meilleures occasions auto"
-      className="relative min-h-screen w-full overflow-hidden"
-      style={{
-        backgroundImage: "url('/autoscore-landing.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center top",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      {/* Overlay action buttons — positioned in the lower half of the landing image
-          matching the two-card layout visible in the design */}
-      <div className="absolute inset-0 flex items-end justify-center pb-[10%]">
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 px-6 w-full max-w-2xl justify-center">
+    <main className="relative w-full">
+      {/* Full landing image — renders at natural aspect ratio so nothing is cropped */}
+      <div className="relative w-full">
+        <Image
+          src="/autoscore-landing.png"
+          alt="Autoscore — Les meilleures occasions auto"
+          width={1536}
+          height={1024}
+          className="w-full h-auto block"
+          priority
+        />
 
-          {/* LEFT CARD — Déposer une annonce (active) */}
+        {/* Overlay CTA buttons — positioned over the card action rows at ~83% image height.
+            Horizontal padding aligns with the two cards in the design (≈21% each side). */}
+        <div
+          className="absolute left-0 right-0 flex flex-row gap-[2.5%]"
+          style={{ top: "83%", paddingLeft: "21%", paddingRight: "21%" }}
+        >
+          {/* LEFT — active, links to /score */}
           <Link
             href="/score"
-            className="flex-1 min-w-0 inline-flex items-center justify-center
-                       rounded-2xl bg-white/90 backdrop-blur-sm border border-white/60
-                       px-5 py-4 text-center font-semibold text-gray-900 text-base sm:text-lg
-                       shadow-lg hover:bg-white hover:shadow-xl transition-all duration-200
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 inline-flex items-center justify-center rounded-xl
+                       bg-[#1b6b3a] hover:bg-[#155530] text-white font-semibold
+                       py-[1.8%] px-2 text-center leading-tight
+                       shadow-lg transition-colors duration-200
+                       focus:outline-none focus:ring-2 focus:ring-green-400"
+            style={{ fontSize: "clamp(11px, 1.1vw, 17px)" }}
           >
             Déposer une annonce
           </Link>
 
-          {/* RIGHT CARD — Bientôt disponible (disabled) */}
+          {/* RIGHT — disabled */}
           <button
             disabled
             aria-disabled="true"
-            className="flex-1 min-w-0 inline-flex items-center justify-center
-                       rounded-2xl bg-white/50 backdrop-blur-sm border border-white/40
-                       px-5 py-4 text-center font-semibold text-gray-400 text-base sm:text-lg
+            className="flex-1 inline-flex items-center justify-center rounded-xl
+                       bg-gray-200 text-gray-400 font-semibold
+                       py-[1.8%] px-2 text-center leading-tight
                        shadow cursor-not-allowed select-none"
+            style={{ fontSize: "clamp(11px, 1.1vw, 17px)" }}
           >
             Bientôt disponible
           </button>
-
         </div>
       </div>
     </main>
