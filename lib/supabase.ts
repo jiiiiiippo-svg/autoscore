@@ -1,15 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseServiceRoleKey =
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  "";
+
+const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_ANON_KEY ||
+  "";
 
-export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseServiceRoleKey);
+export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseKey);
 
 export const supabase = hasSupabaseConfig
-  ? createClient(supabaseUrl as string, supabaseServiceRoleKey as string)
+  ? createClient(supabaseUrl, supabaseKey)
   : null;
 
 export type ComparableFromDb = {
@@ -45,10 +50,10 @@ export async function fetchComparables(
         }
       : brandOrInput;
 
-  const yearMin = input.year - 3;
-  const yearMax = input.year + 3;
-  const mileageMin = Math.max(0, input.mileage - 60000);
-  const mileageMax = input.mileage + 60000;
+  const yearMin = Number(input.year) - 3;
+  const yearMax = Number(input.year) + 3;
+  const mileageMin = Math.max(0, Number(input.mileage) - 60000);
+  const mileageMax = Number(input.mileage) + 60000;
 
   const { data, error } = await supabase
     .from("market_listings")
@@ -67,7 +72,16 @@ export async function fetchComparables(
     return [];
   }
 
-  return (data || []).filter((item) => Number.isFinite(Number(item.price)));
+  return (data || [])
+    .map((item: any) => ({
+      price: Number(item.price),
+      year: item.year === null || item.year === undefined ? null : Number(item.year),
+      mileage:
+        item.mileage === null || item.mileage === undefined
+          ? null
+          : Number(item.mileage),
+    }))
+    .filter((item) => Number.isFinite(item.price));
 }
 
 export function medianPrice(values: Array<number | ComparableFromDb>) {
