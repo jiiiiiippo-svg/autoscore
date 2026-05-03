@@ -34,8 +34,8 @@ export default function Home() {
         alignItems: "center",
         textAlign: "center",
       }}>
-        {/* overlay — keeps mountain/car silhouette, hides text duplication from PNG */}
-        <div style={{ position: "absolute", inset: 0, background: "rgba(248,250,252,0.94)" }} />
+        {/* gradient overlay: opaque top (hides PNG text), transparent bottom sides (shows cars) */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(248,250,252,0.99) 0%, rgba(248,250,252,0.97) 42%, rgba(248,250,252,0.52) 62%, rgba(248,250,252,0.52) 100%)" }} />
 
         {/* all content above the overlay */}
         <div style={{ position: "relative", zIndex: 1, width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
