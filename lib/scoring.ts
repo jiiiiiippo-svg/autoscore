@@ -4,7 +4,9 @@ export type CarInput = {
   year: number;
   mileage: number;
   askingPrice: number;
+  saleTiming?: string;
   description?: string;
+  comparablePrices?: number[];
 };
 
 export type ScoreResult = {
@@ -101,21 +103,46 @@ function priceScore(discountPercent: number) {
   }
 
   if (discountPercent < 5) {
-    return { points: 2, reason: "Prix aligné avec le marché" };
+    return {
+      points: 2,
+      reason: "Prix aligné avec le marché",
+    };
   }
 
   if (discountPercent < 15) {
-    return { points: 3.3, reason: "Prix attractif par rapport au marché" };
+    return {
+      points: 3,
+      reason: "Prix attractif par rapport au marché",
+    };
   }
 
-  if (discountPercent < 25) {
-    return { points: 4, reason: "Très bon prix par rapport au marché" };
+  if (discountPercent < 30) {
+    return {
+      points: 4,
+      reason: "Très bon prix par rapport au marché",
+    };
+  }
+
+  if (discountPercent < 50) {
+    return {
+      points: 3.2,
+      reason: "Prix très bas, opportunité forte mais à vérifier",
+      warning: "Le prix est très inférieur au marché. Vérifiez l’état du véhicule, l’historique et la raison de la vente.",
+    };
+  }
+
+  if (discountPercent < 70) {
+    return {
+      points: 2.2,
+      reason: "Prix anormalement bas",
+      warning: "Le prix est anormalement bas. Il peut y avoir un problème caché ou une information manquante.",
+    };
   }
 
   return {
-    points: 3.5,
-    reason: "Prix très bas, opportunité forte mais à vérifier",
-    warning: "Un prix très bas peut signaler un problème caché ou une vente urgente.",
+    points: 1.2,
+    reason: "Prix beaucoup trop bas pour être fiable",
+    warning: "Le prix est beaucoup trop éloigné du marché. L’annonce doit être vérifiée avant publication.",
   };
 }
 
@@ -130,8 +157,27 @@ function demandScore(car: CarInput) {
   return { points: 1, reason: "Demande correcte sur le marché" };
 }
 
-function urgencyScore(description = "") {
-  const text = normalize(description);
+function urgencyScore(car: CarInput) {
+  const timing = normalize(car.saleTiming || "");
+  const text = normalize(car.description || "");
+
+  let timingPoints = 0.5;
+  let timingReason = "Vendeur sans urgence particulière";
+
+  if (timing === "immediate") {
+    timingPoints = 2;
+    timingReason = "Vente immédiate souhaitée";
+  }
+
+  if (timing === "1-3") {
+    timingPoints = 1.3;
+    timingReason = "Vente souhaitée sous 1 à 3 mois";
+  }
+
+  if (timing === "3-6") {
+    timingPoints = 0.6;
+    timingReason = "Vente prévue sous 3 à 6 mois";
+  }
 
   const signals = [
     "urgent",
@@ -146,10 +192,17 @@ function urgencyScore(description = "") {
 
   const hasSignal = signals.some((signal) => text.includes(signal));
 
-  if (hasSignal) return { points: 2, reason: "Signaux de vendeur motivé détectés" };
-  if (text.length > 40) return { points: 1, reason: "Description suffisante pour qualifier l’annonce" };
+  if (hasSignal && timingPoints < 2) {
+    return {
+      points: Math.min(2, timingPoints + 0.5),
+      reason: `${timingReason} avec signaux de motivation détectés`,
+    };
+  }
 
-  return { points: 0.5, reason: "Peu d’indications sur la motivation du vendeur" };
+  return {
+    points: timingPoints,
+    reason: timingReason,
+  };
 }
 
 function liquidityScore(car: CarInput) {
@@ -162,13 +215,14 @@ function liquidityScore(car: CarInput) {
   return { points: 0.5, reason: "Revente potentiellement plus lente" };
 }
 
-export function calculateAutoscore(car: CarInput): ScoreResult {
-  const marketPrice = estimateMarketPrice(car);
+// realMarketPrice: optional median from Supabase — overrides algo estimate when available
+export function calculateAutoscore(car: CarInput, realMarketPrice?: number): ScoreResult {
+  const marketPrice = realMarketPrice ?? estimateMarketPrice(car);
   const discountPercent = ((marketPrice - car.askingPrice) / marketPrice) * 100;
 
   const price = priceScore(discountPercent);
   const demand = demandScore(car);
-  const urgency = urgencyScore(car.description);
+  const urgency = urgencyScore(car);
   const liquidity = liquidityScore(car);
 
   const rawScore = price.points + demand.points + urgency.points + liquidity.points;
