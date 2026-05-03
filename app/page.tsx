@@ -32,22 +32,25 @@ export default function Home() {
         <Link
           href="/score"
           aria-label="Déposer une annonce"
+          title="Déposer une annonce"
           style={{
             position: "absolute",
-            left: "6.4%",
-            top: "53%",
-            width: "38%",
-            height: "7%",
+            left: "18.16%",
+            top: "69.53%",
+            width: "25.52%",
+            height: "5.47%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: "18px",
-            background: "#16a34a",
-            color: "#fff",
-            fontWeight: 900,
-            fontSize: "clamp(14px, 2vw, 28px)",
+            borderRadius: "14px",
+            background: "#4da851",
+            color: "#ffffff",
             textDecoration: "none",
-            boxShadow: "0 12px 30px rgba(22, 163, 74, 0.25)",
+            fontFamily: "Arial, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(12px, 1.4vw, 22px)",
+            lineHeight: 1,
+            boxShadow: "0 6px 18px rgba(77, 168, 81, 0.18)",
           }}
         >
           Déposer une annonce
