@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
 import { calculateAutoscore } from "@/lib/scoring";
-import { fetchComparables, medianPrice } from "@/lib/supabase";
+import { fetchComparables } from "@/lib/supabase";
+
+function median(values: number[]) {
+  const clean = values
+    .map(Number)
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
+
+  if (clean.length === 0) {
+    return null;
+  }
+
+  const middle = Math.floor(clean.length / 2);
+
+  if (clean.length % 2 === 0) {
+    return Math.round((clean[middle - 1] + clean[middle]) / 2);
+  }
+
+  return Math.round(clean[middle]);
+}
 
 export async function POST(req: Request) {
   try {
@@ -12,8 +31,7 @@ export async function POST(req: Request) {
     const mileage = Number(body.mileage);
     const askingPrice = Number(body.askingPrice);
 
-    let realMarketPrice: number | null = null;
-    let comparableCount = 0;
+    let comparablePrices: number[] = [];
 
     try {
       const comparables = await fetchComparables({
@@ -23,8 +41,7 @@ export async function POST(req: Request) {
         mileage,
       });
 
-      comparableCount = comparables.length;
-      realMarketPrice = medianPrice(comparables);
+      comparablePrices = comparables.map((item) => Number(item.price));
     } catch (dbErr) {
       console.warn("Supabase unavailable, falling back to algo:", dbErr);
     }
@@ -37,17 +54,19 @@ export async function POST(req: Request) {
       askingPrice,
       saleTiming: String(body.saleTiming || ""),
       description: String(body.description || ""),
-      comparablePrices: realMarketPrice ? [realMarketPrice] : [],
+      comparablePrices,
     });
+
+    const realMarketPrice = median(comparablePrices);
 
     return NextResponse.json({
       ...result,
       marketPrice: realMarketPrice || result.marketPrice,
       marketPriceSource:
-        realMarketPrice && comparableCount > 0
-          ? `Prix basé sur ${comparableCount} annonces comparables Autoscore`
-          : result.marketPriceSource || "Prix estimé à partir du modèle Autoscore",
-      priceSamplesUsed: comparableCount || result.priceSamplesUsed || 0,
+        realMarketPrice && comparablePrices.length > 0
+          ? `Prix basé sur ${comparablePrices.length} annonces comparables Autoscore`
+          : result.marketPriceSource,
+      priceSamplesUsed: comparablePrices.length || result.priceSamplesUsed,
     });
   } catch (error) {
     console.error("Score API error:", error);

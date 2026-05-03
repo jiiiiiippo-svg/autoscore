@@ -23,32 +23,15 @@ export type ComparableFromDb = {
   mileage?: number | null;
 };
 
-export async function fetchComparables(
-  brandOrInput:
-    | string
-    | {
-        brand: string;
-        model: string;
-        year: number;
-        mileage: number;
-      },
-  modelArg?: string,
-  yearArg?: number,
-  mileageArg?: number
-): Promise<ComparableFromDb[]> {
+export async function fetchComparables(input: {
+  brand: string;
+  model: string;
+  year: number;
+  mileage: number;
+}): Promise<ComparableFromDb[]> {
   if (!supabase) {
     return [];
   }
-
-  const input =
-    typeof brandOrInput === "string"
-      ? {
-          brand: brandOrInput,
-          model: String(modelArg || ""),
-          year: Number(yearArg),
-          mileage: Number(mileageArg),
-        }
-      : brandOrInput;
 
   const yearMin = Number(input.year) - 3;
   const yearMax = Number(input.year) + 3;
@@ -82,29 +65,4 @@ export async function fetchComparables(
           : Number(item.mileage),
     }))
     .filter((item) => Number.isFinite(item.price));
-}
-
-export function medianPrice(values: Array<number | ComparableFromDb>) {
-  const clean = values
-    .map((value) => {
-      if (typeof value === "number") {
-        return value;
-      }
-
-      return Number(value.price);
-    })
-    .filter((value) => Number.isFinite(value))
-    .sort((a, b) => a - b);
-
-  if (clean.length === 0) {
-    return null;
-  }
-
-  const middle = Math.floor(clean.length / 2);
-
-  if (clean.length % 2 === 0) {
-    return Math.round((clean[middle - 1] + clean[middle]) / 2);
-  }
-
-  return Math.round(clean[middle]);
 }
