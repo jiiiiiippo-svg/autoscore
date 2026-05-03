@@ -1,29 +1,99 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-html,
-body {
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
   margin: 0;
   padding: 0;
   background: #f8fafc;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
-.vendre-btn {
-  position: absolute;
+/* ── Card ── */
+.card {
+  flex: 1;
+  background: white;
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.09);
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-content {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #e8f5ee;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #3a9e5f;
-  color: white;
-  font-weight: 600;
-  font-size: clamp(11px, 1.1vw, 16px);
-  text-decoration: none;
-  border-radius: 12px;
-  transition: opacity 0.15s;
-  font-family: system-ui, -apple-system, sans-serif;
+  flex-shrink: 0;
 }
 
-.vendre-btn:hover {
-  opacity: 0.88;
+.card h3 {
+  color: #1a2e3b;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.card .card-subtitle {
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.card .card-desc {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Buttons ── */
+.card-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 18px 24px;
+  margin-top: 28px;
+  border-radius: 16px;
+  border: none;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: default;
+  box-sizing: border-box;
+  gap: 6px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.card-button.active {
+  background: #16a34a;
+  color: white;
+  cursor: pointer;
+}
+
+.card-button.active:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.card-button.active:active {
+  transform: translateY(0);
 }
