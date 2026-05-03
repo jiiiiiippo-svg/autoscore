@@ -11,6 +11,8 @@ type FormState = {
   mileage: string;
   askingPrice: string;
   saleTiming: string;
+  generalCondition: string;
+  negotiablePrice: string;
 };
 
 type ScoreResult = {
@@ -325,6 +327,8 @@ export default function ScorePage() {
     mileage: "",
     askingPrice: "",
     saleTiming: "",
+    generalCondition: "",
+    negotiablePrice: "",
   });
 
   const [result, setResult] = useState<ScoreResult | null>(null);
@@ -557,7 +561,56 @@ export default function ScorePage() {
                       placeholder="Nouveau prix demandé"
                     />
 
-                    <button
+                    <label style={labelStyle}>
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  État général
+                  <span
+                    title={"Excellent : Véhicule très soigné, aucun frais connu à prévoir.\n\nBon : Véhicule propre, usure normale, entretien suivi.\n\nCorrect : Véhicule roulant, mais quelques défauts visibles ou frais légers possibles.\n\nFrais à prévoir : Réparations, entretien important, carrosserie, pneus, freins ou expertise à prévoir."}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 18,
+                      height: 18,
+                      borderRadius: "999px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "help",
+                      background: "#E8F0FE",
+                      color: "#1E40AF",
+                      border: "1px solid #BFDBFE",
+                    }}
+                  >
+                    i
+                  </span>
+                </span>
+                <select
+                  style={inputStyle}
+                  value={form.generalCondition}
+                  onChange={(e) => updateField("generalCondition", e.target.value)}
+                >
+                  <option value="">Sélectionner</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Bon</option>
+                  <option value="fair">Correct</option>
+                  <option value="work-needed">Frais à prévoir</option>
+                </select>
+              </label>
+
+              <label style={labelStyle}>
+                Prix négociable
+                <select
+                  style={inputStyle}
+                  value={form.negotiablePrice}
+                  onChange={(e) => updateField("negotiablePrice", e.target.value)}
+                >
+                  <option value="">Sélectionner</option>
+                  <option value="yes">Oui</option>
+                  <option value="no">Non</option>
+                </select>
+              </label>
+
+              <button
                       onClick={handleScore}
                       disabled={loading}
                       style={{
