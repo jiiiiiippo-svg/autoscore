@@ -70,9 +70,15 @@ export async function fetchComparables(
   return (data || []).filter((item) => Number.isFinite(Number(item.price)));
 }
 
-export function medianPrice(values: number[]) {
+export function medianPrice(values: Array<number | ComparableFromDb>) {
   const clean = values
-    .map(Number)
+    .map((value) => {
+      if (typeof value === "number") {
+        return value;
+      }
+
+      return Number(value.price);
+    })
     .filter((value) => Number.isFinite(value))
     .sort((a, b) => a - b);
 
