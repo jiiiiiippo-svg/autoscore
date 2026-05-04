@@ -12,15 +12,18 @@ function extractPrice(item: any): number | null {
 }
 
 /**
- * Extrait l'année depuis firstRegistration "2006-04-01" ou "2006-01".
+ * Extrait l'année depuis firstRegistration.
+ * Supporte: "2006-04-01" (avec details), "07-2007" (sans details), "2006"
  */
 function extractYear(item: any): number | null {
   const reg = item?.firstRegistration;
-  if (typeof reg === "string" && reg.length >= 4) {
-    const year = Number(reg.slice(0, 4));
-    return Number.isFinite(year) && year > 1900 ? year : null;
-  }
-  return null;
+  if (typeof reg !== "string") return null;
+  // Cherche 4 chiffres consécutifs qui ressemblent à une année (1950–2030)
+  const match = reg.match(/\b(19[5-9]\d|20[0-2]\d)\b/);
+  if (match) return Number(match[1]);
+  // Fallback: premiers 4 chars
+  const year = Number(reg.slice(0, 4));
+  return Number.isFinite(year) && year > 1900 ? year : null;
 }
 
 /**
@@ -93,6 +96,10 @@ export async function POST(req: Request) {
         const price = extractPrice(item);
         if (!price) return null;
 
+        const year = extractYear(item);
+        // Ignore listings sans année valide (contrainte NOT NULL en DB)
+        if (!year) return null;
+
         // Format blackfalcondata/autoscout24-scraper
         return {
           source: "autoscout24",
@@ -100,7 +107,7 @@ export async function POST(req: Request) {
           brand: item.make || item.brand || null,
           model: item.model || null,
           model_version: item.modelVersion || item.variant || null,
-          year: extractYear(item),
+          year,
           mileage: extractMileage(item),
           price,
           body_type: item.bodyType || null,
