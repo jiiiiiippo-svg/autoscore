@@ -1,38 +1,68 @@
 import { NextResponse } from "next/server";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 
+/**
+ * Extrait le prix depuis un item blackfalcondata/autoscout24-scraper.
+ * Format: { price: 12500, currency: "EUR" } — prix directement en nombre.
+ */
 function extractPrice(item: any): number | null {
-  const value =
-    item?.price?.current?.amount ??
-    item?.price?.amount ??
-    item?.price ??
-    null;
-
-  const price = Number(value);
-
-  return Number.isFinite(price) ? price : null;
+  // Format blackfalcondata: item.price est un nombre direct
+  const price = Number(item?.price ?? null);
+  return Number.isFinite(price) && price > 0 ? price : null;
 }
 
+/**
+ * Extrait l'année depuis firstRegistration "2006-04-01" ou "2006-01".
+ */
 function extractYear(item: any): number | null {
-  const firstRegistration = item?.attributes?.["First Registration"];
-
-  if (typeof firstRegistration === "string" && firstRegistration.length >= 4) {
-    const year = Number(firstRegistration.slice(0, 4));
-    return Number.isFinite(year) ? year : null;
+  const reg = item?.firstRegistration;
+  if (typeof reg === "string" && reg.length >= 4) {
+    const year = Number(reg.slice(0, 4));
+    return Number.isFinite(year) && year > 1900 ? year : null;
   }
-
   return null;
 }
 
+/**
+ * Extrait le kilométrage depuis mileageKm (nombre direct).
+ */
 function extractMileage(item: any): number | null {
-  const mileage = item?.attributes?.["Mileage (km)"];
+  const mileage = item?.mileageKm;
   const parsed = Number(mileage);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
 
-  return Number.isFinite(parsed) ? parsed : null;
+async function fetchDatasetItems(datasetId: string, apifyToken: string): Promise<any[]> {
+  const allItems: any[] = [];
+  let offset = 0;
+  const limit = 1000;
+
+  while (true) {
+    const url = `https://api.apify.com/v2/datasets/${datasetId}/items?token=${apifyToken}&limit=${limit}&offset=${offset}`;
+    const res = await fetch(url);
+    if (!res.ok) break;
+
+    const batch = await res.json();
+    if (!Array.isArray(batch) || batch.length === 0) break;
+
+    allItems.push(...batch);
+    if (batch.length < limit) break;
+    offset += limit;
+  }
+
+  return allItems;
 }
 
 export async function POST(req: Request) {
   try {
+    const body = await req.json();
+
+    // Vérification du secret webhook
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+    if (webhookSecret && body.secret !== webhookSecret) {
+      return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
+    }
+
     if (!hasSupabaseConfig || !supabase) {
       return NextResponse.json({
         ok: true,
@@ -41,99 +71,78 @@ export async function POST(req: Request) {
       });
     }
 
-    const body = await req.json();
+    const apifyToken = process.env.APIFY_TOKEN;
+    if (!apifyToken) {
+      return NextResponse.json({ error: "APIFY_TOKEN manquant" }, { status: 500 });
+    }
 
-    const items = Array.isArray(body)
-      ? body
-      : Array.isArray(body.items)
-        ? body.items
-        : Array.isArray(body.data)
-          ? body.data
-          : [];
+    // Récupère les items depuis le dataset Apify
+    const datasetId = body.datasetId;
+    if (!datasetId) {
+      return NextResponse.json({ error: "datasetId manquant" }, { status: 400 });
+    }
+
+    const items = await fetchDatasetItems(datasetId, apifyToken);
 
     if (items.length === 0) {
-      return NextResponse.json({
-        ok: true,
-        inserted: 0,
-        reason: "No items received",
-      });
+      return NextResponse.json({ ok: true, inserted: 0, reason: "Dataset vide" });
     }
 
     const rows = items
       .map((item: any) => {
         const price = extractPrice(item);
+        if (!price) return null;
 
-        if (!price) {
-          return null;
-        }
-
+        // Format blackfalcondata/autoscout24-scraper
         return {
           source: "autoscout24",
-          external_id: String(item.id || item.url || crypto.randomUUID()),
-          brand: item.brand || null,
+          external_id: String(item.listingId || item.id || item.url || crypto.randomUUID()),
+          brand: item.make || item.brand || null,
           model: item.model || null,
-          model_version: item.modelVersion || item.title || null,
+          model_version: item.modelVersion || item.variant || null,
           year: extractYear(item),
           mileage: extractMileage(item),
           price,
           body_type: item.bodyType || null,
-          fuel: item.attributes?.Fuel || null,
-          transmission: item.attributes?.Transmission || null,
-          power_kw: item.attributes?.["Power (kW)"] || null,
-          seller_type: item.dealerDetails?.sellerType || null,
-          dealer_name: item.dealerDetails?.name || null,
-          url: item.url || null,
+          fuel: item.fuelType || item.fuel || null,
+          transmission: item.transmission || null,
+          power_kw: item.powerKw != null ? Number(item.powerKw) : null,
+          seller_type: item.sellerType || null,
+          dealer_name: item.sellerName || null,
+          url: item.url || item.portalUrl || null,
           scraped_at: new Date().toISOString(),
         };
       })
       .filter(Boolean);
 
     if (rows.length === 0) {
-      return NextResponse.json({
-        ok: true,
-        inserted: 0,
-        reason: "No valid prices found",
-      });
+      return NextResponse.json({ ok: true, inserted: 0, reason: "Aucun prix valide" });
     }
 
-    const { error } = await supabase
-      .from("market_listings")
-      .upsert(rows, {
-        onConflict: "source,external_id",
-      });
+    // Upsert par batch de 500
+    let totalInserted = 0;
+    for (let i = 0; i < rows.length; i += 500) {
+      const batch = rows.slice(i, i + 500);
+      const { error } = await supabase
+        .from("market_listings")
+        .upsert(batch, { onConflict: "source,external_id" });
 
-    if (error) {
-      console.error("Apify webhook Supabase error:", error.message);
-
-      return NextResponse.json(
-        {
-          ok: false,
-          error: error.message,
-        },
-        { status: 500 }
-      );
+      if (error) {
+        console.error("Supabase upsert error:", error.message);
+        return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      }
+      totalInserted += batch.length;
     }
 
-    return NextResponse.json({
-      ok: true,
-      inserted: rows.length,
-    });
+    console.log(`Webhook Apify: ${totalInserted} annonces importées depuis dataset ${datasetId}`);
+
+    return NextResponse.json({ ok: true, inserted: totalInserted, datasetId });
   } catch (error) {
     console.error("Apify webhook error:", error);
-
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Webhook failed",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: "Webhook failed" }, { status: 500 });
   }
 }
 
 export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    route: "apify webhook",
-  });
+  return NextResponse.json({ ok: true, route: "apify webhook" });
 }

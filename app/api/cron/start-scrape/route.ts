@@ -2,15 +2,21 @@
  * GET /api/cron/start-scrape
  *
  * Appelé automatiquement par Vercel Cron le 1er et le 15 du mois à 06h00.
- * Démarre un run Apify et configure un webhook pour l'import automatique.
- * Scrape TOUTES les marques disponibles sur AutoScout24.ch (pas de filtre modèle).
+ * Démarre un run Apify (blackfalcondata/autoscout24-scraper) pour DE + AT.
  * Rend la main immédiatement — pas de timeout.
+ *
+ * Note: AutoScout24.ch bloque les scrapers. On utilise les données européennes
+ * (DE + AT) comme référence de marché — prix comparables à la Suisse.
  */
 
 import { NextResponse } from "next/server";
-import { buildAllBrandUrls, TOTAL_BRANDS } from "@/config/brands";
 
-const ACTOR_ID = "3x1t/autoscout24-ch-scraper";
+// Actor Apify qui supporte vraiment autoscout24.com (Playwright + proxies résidentiels)
+// Marchés supportés : DE, AT, BE, FR, IT, NL, ES, LU
+const ACTOR_ID = "blackfalcondata~autoscout24-scraper";
+
+// Pays européens utilisés comme référence de prix (proche du marché suisse)
+const TARGET_COUNTRIES = ["DE", "AT"];
 
 export async function GET(req: Request) {
   // Sécurité : Vercel envoie le header Authorization avec le cron secret
@@ -34,8 +40,10 @@ export async function GET(req: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        startUrls: buildAllBrandUrls(),
-        maxItemsPerSearch: 200,
+        // Paramètres natifs du blackfalcondata actor
+        countries: TARGET_COUNTRIES,
+        maxResults: 2000,
+        includeDetails: true,
         // Webhook Apify → appelé automatiquement quand le run est terminé
         webhooks: [
           {
@@ -59,12 +67,12 @@ export async function GET(req: Request) {
   }
 
   const { data } = await res.json();
-  console.log(`Scrape démarré — Run ID: ${data.id}, ${TOTAL_BRANDS} marques`);
+  console.log(`Scrape démarré — Run ID: ${data.id}, pays: ${TARGET_COUNTRIES.join("+")}`);
 
   return NextResponse.json({
     ok: true,
     runId: data.id,
-    brands: TOTAL_BRANDS,
-    message: `Scrape démarré sur ${TOTAL_BRANDS} marques. Import automatique via webhook à la fin.`,
+    countries: TARGET_COUNTRIES,
+    message: `Scrape démarré sur ${TARGET_COUNTRIES.join(", ")}. Import automatique via webhook à la fin.`,
   });
 }
