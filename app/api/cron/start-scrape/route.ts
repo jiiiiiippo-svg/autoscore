@@ -41,9 +41,10 @@ export async function GET(req: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         // Paramètres natifs du blackfalcondata actor
+        // includeDetails: false = scrape rapide (~6 min pour 500 items vs ~2h avec details)
         countries: TARGET_COUNTRIES,
-        maxResults: 2000,
-        includeDetails: true,
+        maxResults: 500,
+        includeDetails: false,
         // Webhook Apify → appelé automatiquement quand le run est terminé
         webhooks: [
           {
