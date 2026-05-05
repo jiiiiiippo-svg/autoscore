@@ -376,7 +376,14 @@ export default function ScorePage() {
       <section style={shellStyle}>
         <header style={headerStyle}>
           <Link href="/" style={logoStyle}>
-            Auto<span style={{ color: "#16a34a" }}>score</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+              <svg width="34" height="34" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M14 36a18 18 0 1 1 36 0" stroke="#16a34a" strokeWidth="6" strokeLinecap="round" />
+                <path d="M32 32l10 7" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
+                <circle cx="32" cy="32" r="4.5" fill="#0f172a" />
+              </svg>
+              <span>Auto<span style={{ color: "#16a34a" }}>score</span></span>
+            </span>
           </Link>
 
           <span style={headerPillStyle}>Déposer une annonce</span>
@@ -384,7 +391,7 @@ export default function ScorePage() {
 
         <section style={heroStyle}>
           <div>
-            <p style={kickerStyle}>Score propriétaire Autoscore</p>
+            
 
             <h1 style={titleStyle}>
               Score ta voiture avant de publier
