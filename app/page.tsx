@@ -29,7 +29,7 @@ const brandStyle = {
   color: "#0f172a",
   fontSize: 26,
   fontWeight: 900,
-  letterSpacing: "-0.04em",
+  letterSpacing: "-0.02em",
 } as const;
 
 const navButtonStyle = {
@@ -69,7 +69,7 @@ const badgeStyle = {
 
 const titleStyle = {
   fontSize: "clamp(44px, 7vw, 82px)",
-  lineHeight: 0.92,
+  lineHeight: 0.942,
   letterSpacing: "-0.07em",
   margin: 0,
   maxWidth: 760,
