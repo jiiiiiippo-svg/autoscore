@@ -28,8 +28,8 @@ const brandStyle = {
   textDecoration: "none",
   color: "#0f172a",
   fontSize: 26,
-  fontWeight: 900,
-  letterSpacing: "-0.02em",
+  fontWeight: 800,
+  letterSpacing: "0em",
 } as const;
 
 const navButtonStyle = {
@@ -69,7 +69,7 @@ const badgeStyle = {
 
 const titleStyle = {
   fontSize: "clamp(44px, 7vw, 82px)",
-  lineHeight: 0.942,
+  lineHeight: 1.022,
   letterSpacing: "-0.07em",
   margin: 0,
   maxWidth: 760,
@@ -101,7 +101,7 @@ const primaryCtaStyle = {
   color: "white",
   textDecoration: "none",
   fontSize: 17,
-  fontWeight: 900,
+  fontWeight: 800,
   boxShadow: "0 18px 36px rgba(22, 163, 74, 0.28)",
 } as const;
 
@@ -191,7 +191,7 @@ const iconStyle = {
   placeItems: "center",
   background: "#dcfce7",
   color: "#15803d",
-  fontWeight: 900,
+  fontWeight: 800,
   marginBottom: 18,
 } as const;
 
@@ -262,7 +262,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div style={{ fontSize: 22, fontWeight: 900, textAlign: "center" }}>
+              <div style={{ fontSize: 22, fontWeight: 800, textAlign: "center" }}>
                 Véhicule attractif
               </div>
 
