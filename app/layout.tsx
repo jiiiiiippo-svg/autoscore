@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Autoscore.ch — Scorez votre voiture en 30 secondes",
-  description: "Autoscore calcule l’attractivité de votre véhicule et le rend visible auprès de garages partenaires. Gratuit, rapide, sans prise de tête.",
+  description: "Autoscore calcule l’attractivité de votre véhicule et le rend visible auprès de garages partenaires. Gratuit, rapide, zéro stress.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

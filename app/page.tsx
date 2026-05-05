@@ -229,7 +229,7 @@ export default function Home() {
 
             <p style={subtitleStyle}>
               Autoscore calcule l’attractivité de votre véhicule et le rend visible
-              auprès de garages partenaires. Gratuit, rapide, sans prise de tête.
+              auprès de garages partenaires. Gratuit, rapide, zéro stress.
             </p>
 
             <div style={ctaRowStyle}>
