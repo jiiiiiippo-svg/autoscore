@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Autoscore.ch — Les meilleures occasions auto",
-  description: "Les meilleures occasions auto, analysées et sélectionnées.",
+  title: "Autoscore.ch — Scorez votre voiture en 30 secondes",
+  description: "Autoscore calcule l’attractivité de votre véhicule et le rend visible auprès de garages partenaires. Gratuit, rapide, sans spam.",
   icons: {
     icon: [
       { url: "/favicon.ico" },
