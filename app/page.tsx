@@ -225,7 +225,13 @@ export default function Home() {
           <div>
             <div style={badgeStyle}>✓ Gratuit pour les vendeurs particuliers</div>
 
-            <h1 style={titleStyle}>Scorez votre voiture en 30 secondes</h1>
+            <h1 style={titleStyle}><>
+              Scorez votre
+              <br />
+              voiture en
+              <br />
+              30 secondes
+            </></h1>
 
             <p style={subtitleStyle}>
               Autoscore calcule l’attractivité de votre véhicule et le rend visible
