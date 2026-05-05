@@ -68,9 +68,10 @@ const badgeStyle = {
 } as const;
 
 const titleStyle = {
-  fontSize: "clamp(44px, 7vw, 82px)",
-  lineHeight: 1.022,
-  letterSpacing: "-0.07em",
+  fontSize: "clamp(42px, 5.4vw, 76px)",
+  lineHeight: 1.08,
+  letterSpacing: "-0.015em",
+  fontWeight: 800,
   margin: 0,
   maxWidth: 760,
 } as const;
